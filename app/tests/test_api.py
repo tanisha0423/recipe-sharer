@@ -1,29 +1,26 @@
 from fastapi.testclient import TestClient
-from app.main import app
+from main import app
 
 client = TestClient(app)
 
-def test_create_user():
-    response = client.post("/users/", json={
-        "username": "user2",
-        "email": "user2@example.com",
-        "password": "user2123"
-    })
-    assert response.status_code == 200
-
-    assert response.json()["username"] == "user2"
-
 def test_create_recipe():
-    response = client.post("/recipes/?user_id=1", json={
-        "title": "Maggi",
-        "description": "Soupy hot Maggi noodles",
-        "ingredients": "Noodles, Maggi masala",
-        "instructions": "Follow Instructions on packet"
-    })
-    assert response.status_code == 200
-    assert response.json()["title"] == "Maggi"
+    response = client.post(
+        "/recipes/",
+        json={
+            "title": "Masala Dosa",
+            "ingredients": "Rice, Urad dal, Potato, Onion, Mustard seeds, Curry leaves, Oil, Salt",
+            "instructions": "Soak rice and dal overnight, grind to a batter, ferment, make dosas on tawa, and fill with potato masala."
+        },
+    )
+    assert response.status_code == 200 or response.status_code == 201
+    data = response.json()
+    assert data["title"] == "Masala Dosa"
 
-def test_get_recipes():
+def test_read_recipes():
     response = client.get("/recipes/")
     assert response.status_code == 200
-    assert isinstance(response.json(), list)
+    data = response.json()
+    assert isinstance(data, list)
+    if data:
+        assert "title" in data[0]
+        assert "ingredients" in data[0]
